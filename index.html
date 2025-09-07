@@ -17,11 +17,8 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-    // Pixel 1
     fbq('init', '1402106630879240'); 
-    // Pixel 2
     fbq('init', '1094915696142365'); 
-
     fbq('track', 'PageView');
   </script>
   <noscript>
@@ -53,7 +50,7 @@
       border-radius: 16px;
       display: none;
       user-select: none;
-      pointer-events: none; /* bloqueia cliques no vídeo */
+      pointer-events: none;
     }
 
     #timer {
@@ -97,11 +94,7 @@
 
   <div id="timer">00:00</div>
 
- <video id="video" playsinline
-  disablePictureInPicture
-  controlsList="nodownload noremoteplayback noplaybackrate"
-  oncontextmenu="return false;">
-
+  <video id="video" playsinline
     disablePictureInPicture 
     controlsList="nodownload noremoteplayback noplaybackrate" 
     oncontextmenu="return false;">
@@ -120,24 +113,22 @@
     const timer = document.getElementById('timer');
 
     let callDuration = 0;
-    const maxDuration = 420; // 7 minutos (420s)
-    const disableTime = 48 * 60 * 60 * 1000; // 48 horas em ms
+    const maxDuration = 420; // 7 minutos
+    const disableTime = 48 * 60 * 60 * 1000; // 48h
 
-    // Checa se já passou o tempo de bloqueio
     const lastClick = localStorage.getItem('chamada_video_time');
     if (lastClick) {
       const elapsed = Date.now() - parseInt(lastClick, 10);
       if (elapsed < disableTime) {
-        startBtn.style.display = 'none'; // ainda dentro das 48h
+        startBtn.style.display = 'none';
       } else {
-        localStorage.removeItem('chamada_video_time'); // já expirou, libera o botão
+        localStorage.removeItem('chamada_video_time');
       }
     }
 
     function startCall() {
       if (localStorage.getItem('chamada_video_time')) return;
 
-      // Dispara evento Purchase nos 2 pixels
       fbq('track', 'Purchase', {
         value: 16.90,
         currency: 'BRL'
@@ -145,6 +136,16 @@
 
       video.style.display = 'block';
       video.play();
+
+      // fullscreen após clique
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+      }
+
       startBtn.style.display = 'none';
       localStorage.setItem('chamada_video_time', Date.now().toString());
 
@@ -162,7 +163,6 @@
       }, 1000);
     }
 
-    // Impede pausar manualmente
     video.addEventListener('pause', () => {
       if (callDuration < maxDuration) {
         video.play();
